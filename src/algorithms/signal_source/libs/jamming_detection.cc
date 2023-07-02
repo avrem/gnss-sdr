@@ -23,8 +23,6 @@
 #include <utility>
 #include <volk/volk.h>
 
-#pragma message("Jamming detection compile")
-
 #define MEMORY_LEN 5 // remember jamming even std rises suddendly
 
 Gnss_Jamming_Protect::Gnss_Jamming_Protect(float threshold, int averages) : gr::sync_block("jamming_detection",
@@ -119,7 +117,6 @@ int Gnss_Jamming_Protect::work(int noutput_items,
        volk_32fc_s32fc_multiply_32fc(carre,(const gr_complex*)input_items[0],-weight_,CHUNK_SIZE); 
        volk_32fc_x2_add_32fc((gr_complex*)output_items[0], (const gr_complex*)input_items[1], carre, CHUNK_SIZE);
       }
-//    delete plan;
     volk_free(carre);
     return noutput_items;
 }

@@ -24,11 +24,7 @@
 #define GNSS_SDR_GNSS_SDR_JAM_H
 
 #include "concurrent_queue.h"
-#if GNURADIO_USES_STD_POINTERS
-#include <memory>
-#else
-#include <boost/shared_ptr.hpp>
-#endif
+#include "gnss_block_interface.h"
 #include <gnuradio/sync_block.h>  // for sync_block
 #include <gnuradio/types.h>       // for gr_vector_const_void_star
 #include <pmt/pmt.h>
@@ -36,21 +32,16 @@
 #include <cstdint>
 #include <memory>
 
-#include <gnuradio/fft/fft.h>
-#include <gnuradio/fft/fft_shift.h>
+#include "gnss_sdr_fft.h"
 
 // #define CHUNK_SIZE (2048*8*2) // ~1023 MS/s/32768=30~Hz/bin
 #define CHUNK_SIZE (8192*64) // cf Matlab
 #define NORM_THRESHOLD (0.08)
+#define Navg (1)  // FFT averages
 
 class Gnss_Jamming_Protect;
-#if GNURADIO_USES_STD_POINTERS
-std::shared_ptr<Gnss_Jamming_Protect> gnss_sdr_make_jamm(
+gnss_shared_ptr<Gnss_Jamming_Protect> gnss_sdr_make_jamm(
     float threshold, int averages);
-#else
-boost::shared_ptr<Gnss_Jamming_Protect> gnss_sdr_make_jamm(
-    float threshold, int averages);
-#endif
 
 /*!
  * \brief Implementation of a GNU Radio block that sends a STOP message to the
@@ -64,17 +55,12 @@ public:
         gr_vector_void_star &output_items);
 
 private:
-#if GNURADIO_USES_STD_POINTERS
-    friend std::shared_ptr<Gnss_Jamming_Protect> gnss_sdr_make_jamm(
+    friend gnss_shared_ptr<Gnss_Jamming_Protect> gnss_sdr_make_jamm(
            float threshold, int averages);
-#else
-    friend boost::shared_ptr<Gnss_Jamming_Protect> gnss_sdr_make_jamm(
-           float threshold, int averages);
-#endif
 
     Gnss_Jamming_Protect(float threshold, int averages);
-    gr::fft::fft_complex* plan = new gr::fft::fft_complex(CHUNK_SIZE, true);
-    gr::fft::fft_complex* iplan= new gr::fft::fft_complex(CHUNK_SIZE, false); // forward = false
+    std::unique_ptr<gnss_fft_complex_fwd> plan = gnss_fft_fwd_make_unique(CHUNK_SIZE);
+    std::unique_ptr<gnss_fft_complex_rev> iplan = gnss_fft_rev_make_unique(CHUNK_SIZE);
     gr_complex bufout0[CHUNK_SIZE];
     gr_complex bufout[CHUNK_SIZE];
     gr_complex processed_output[CHUNK_SIZE];
