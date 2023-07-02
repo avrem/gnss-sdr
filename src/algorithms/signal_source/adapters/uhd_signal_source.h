@@ -62,6 +62,7 @@ private:
     gr::uhd::usrp_source::sptr uhd_source_;
 
     std::vector<gnss_shared_ptr<gr::block>> valve_;
+    gnss_shared_ptr<gr::block> jamming_sgd_;
     std::vector<gr::blocks::file_sink::sptr> file_sink_;
     std::vector<double> freq_;
     std::vector<double> gain_;
@@ -87,6 +88,7 @@ private:
     double sample_rate_;
     size_t item_size_;
     int RF_channels_;
+    int sgd_;
     unsigned int in_stream_;
     unsigned int out_stream_;
 };

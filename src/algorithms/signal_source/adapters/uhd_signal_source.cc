@@ -21,6 +21,7 @@
 #include "gnss_sdr_filesystem.h"
 #include "gnss_sdr_string_literals.h"
 #include "gnss_sdr_valve.h"
+#include "sgd.h"
 #include <glog/logging.h>
 #include <uhd/exception.hpp>
 #include <uhd/types/device_addr.hpp>
@@ -58,10 +59,23 @@ UhdSignalSource::UhdSignalSource(const ConfigurationInterface* configuration,
         {
             dev_addr["serial"] = device_serial;
         }
-    subdevice_ = configuration->property(role + ".subdevice", empty);
     clock_source_ = configuration->property(role + ".clock_source", std::string("internal"));
     otw_format_ = configuration->property(role + ".otw_format", std::string("sc16"));
     RF_channels_ = configuration->property(role + ".RF_channels", 1);
+    sgd_  = configuration->property(role + ".sgd", 0);
+    if (sgd_ !=0) 
+         {printf("SGD jamming protection %d\n",sgd_); fflush(stdout);
+          RF_channels_=sgd_; // SGD jamming protection: override RF_channels in this block only => N inputs and RF_chan=1 output
+          subdevice_ = configuration->property(role + ".subdevice", std::string("A:A A:B"));
+          float sgd_alpha = configuration->property(role + ".sgd_alpha", 1e-2);
+          bool sgd_mean = configuration->property(role + ".sgd_mean", true);
+          int sgd_mean_length = configuration->property(role + ".sgd_mean_length", 100);
+          int sgd_iter_count = configuration->property(role + ".sgd_iter_count", 10000);
+          jamming_sgd_=gnss_sdr_make_sgd(0, 5e-3, sgd_alpha, sgd_mean, sgd_mean_length, sgd_iter_count);
+         }
+    if ((sgd_ == 0))
+         {subdevice_ = configuration->property(role + ".subdevice", empty); 
+         }
     sample_rate_ = configuration->property(role + ".sampling_frequency", 4.0e6);
     item_type_ = configuration->property(role + ".item_type", default_item_type);
 
@@ -315,6 +329,11 @@ void UhdSignalSource::connect(gr::top_block_sptr top_block)
                             DLOG(INFO) << "connected usrp source to file sink RF Channel " << i;
                         }
                 }
+            if (sgd_ != 0)
+                {
+                    top_block->connect(uhd_source_, i, jamming_sgd_, i);
+                    printf("UHD -> SGD connect: %d\n",i);fflush(stdout);
+                }
         }
 }
 
@@ -364,6 +383,10 @@ gr::basic_block_sptr UhdSignalSource::get_right_block(int RF_channel)
     if (samples_.at(RF_channel) != 0ULL)
         {
             return valve_.at(RF_channel);
+        }
+    if ( jamming_sgd_ != 0ULL)
+        {
+            return jamming_sgd_;
         }
     return uhd_source_;
 }

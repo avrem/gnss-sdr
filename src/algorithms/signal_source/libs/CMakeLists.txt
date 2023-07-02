@@ -33,6 +33,7 @@ set(SIGNAL_SOURCE_LIB_SOURCES
     rtl_tcp_dongle_info.cc
     gnss_sdr_valve.cc
     gnss_sdr_timestamp.cc
+    sgd_impl.cc
     ${OPT_SIGNAL_SOURCE_LIB_SOURCES}
 )
 
@@ -40,6 +41,7 @@ set(SIGNAL_SOURCE_LIB_HEADERS
     rtl_tcp_commands.h
     rtl_tcp_dongle_info.h
     gnss_sdr_valve.h
+    sgd.h
     ${OPT_SIGNAL_SOURCE_LIB_HEADERS}
 )
 
