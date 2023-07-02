@@ -63,6 +63,7 @@ private:
 
     std::vector<gnss_shared_ptr<gr::block>> valve_;
     gnss_shared_ptr<gr::block> jamming_sgd_;
+    gnss_shared_ptr<gr::block> jamming_xcorr_;
     std::vector<gr::blocks::file_sink::sptr> file_sink_;
     std::vector<double> freq_;
     std::vector<double> gain_;
@@ -89,6 +90,9 @@ private:
     size_t item_size_;
     int RF_channels_;
     int sgd_;
+    int jamming_;
+    int jamming_averages;
+    double jamming_threshold;
     unsigned int in_stream_;
     unsigned int out_stream_;
 };

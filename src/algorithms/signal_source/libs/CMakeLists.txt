@@ -34,6 +34,7 @@ set(SIGNAL_SOURCE_LIB_SOURCES
     gnss_sdr_valve.cc
     gnss_sdr_timestamp.cc
     sgd_impl.cc
+    jamming_detection.cc
     ${OPT_SIGNAL_SOURCE_LIB_SOURCES}
 )
 
@@ -41,6 +42,7 @@ set(SIGNAL_SOURCE_LIB_HEADERS
     rtl_tcp_commands.h
     rtl_tcp_dongle_info.h
     gnss_sdr_valve.h
+    jamming_detection.h
     sgd.h
     ${OPT_SIGNAL_SOURCE_LIB_HEADERS}
 )
