@@ -27,23 +27,13 @@
 
 //#define DEBUG_COEFF
 
-#if GNURADIO_USES_STD_POINTERS
-std::shared_ptr<sgd_impl> gnss_sdr_make_sgd(
+gnss_shared_ptr<sgd_impl> gnss_sdr_make_sgd(
     int delay_max, float seuil, float alpha, bool mean, int mean_length,
         int iter_count)
 {
-	std::shared_ptr<sgd_impl> sgd_inst(new sgd_impl(delay_max, seuil, alpha, mean, mean_length, iter_count));
+	gnss_shared_ptr<sgd_impl> sgd_inst(new sgd_impl(delay_max, seuil, alpha, mean, mean_length, iter_count));
 	return sgd_inst;
 }
-#else
-boost::shared_ptr<sgd_impl> gnss_sdr_make_sgd(
-    int delay_max, float seuil, float alpha, bool mean, int mean_length,
-        int iter_count)
-{
-	boost::shared_ptr<sgd_impl> sgd_inst(new sgd_impl(delay_max, seuil, alpha, mean, mean_length, iter_count));
-	return sgd_inst;
-}
-#endif
 
     /*
      * The private constructor

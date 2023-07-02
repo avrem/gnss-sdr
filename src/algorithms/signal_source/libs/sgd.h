@@ -20,11 +20,7 @@
 
 #ifndef INCLUDED_SGD_SGD_IMPL_H
 #define INCLUDED_SGD_SGD_IMPL_H
-#if GNURADIO_USES_STD_POINTERS
-#include <memory>
-#else
-#include <boost/shared_ptr.hpp>
-#endif
+#include "gnss_block_interface.h"
 #include <gnuradio/sync_block.h>  // for sync_block
 #include <gnuradio/types.h>       // for gr_vector_const_void_star
 #include <pmt/pmt.h>
@@ -33,28 +29,16 @@
 
 class sgd_impl;
 
-#if GNURADIO_USES_STD_POINTERS
-std::shared_ptr<sgd_impl> gnss_sdr_make_sgd(
+gnss_shared_ptr<sgd_impl> gnss_sdr_make_sgd(
     int delay_max, float seuil, float alpha,
         bool mean, int mean_length, int iter_count);
-#else
-boost::shared_ptr<sgd_impl> gnss_sdr_make_sgd(
-    int delay_max, float seuil, float alpha,
-        bool mean, int mean_length, int iter_count);
-#endif
 
     class sgd_impl : public gr::sync_block
     {
      private:
-#if GNURADIO_USES_STD_POINTERS
-         friend std::shared_ptr<sgd_impl> gnss_sdr_make_sgd(
+         friend gnss_shared_ptr<sgd_impl> gnss_sdr_make_sgd(
              int delay_max, float seuil, float alpha,
                   bool mean, int mean_length, int iter_count);
-#else
-         friend boost::shared_ptr<sgd_impl> gnss_sdr_make_sgd(
-             int delay_max, float seuil, float alpha,
-                  bool mean, int mean_length, int iter_count);
-#endif
 
       int _w1_size;
       float _seuil;
