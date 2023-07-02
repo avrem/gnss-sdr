@@ -45,33 +45,22 @@ https://lists.gnu.org/archive/html/discuss-gnuradio/2019-08/msg00188.html
     jamming_memory_=0;
 }
 
-#if GNURADIO_USES_STD_POINTERS
-std::shared_ptr<Gnss_Jamming_Protect> gnss_sdr_make_jamm(float threshold, int averages)
+gnss_shared_ptr<Gnss_Jamming_Protect> gnss_sdr_make_jamm(float threshold, int averages)
 {
-    std::shared_ptr<Gnss_Jamming_Protect> jamming_detect_(new Gnss_Jamming_Protect(threshold, averages));
+    gnss_shared_ptr<Gnss_Jamming_Protect> jamming_detect_(new Gnss_Jamming_Protect(threshold, averages));
     return jamming_detect_;
 }
-#else
-boost::shared_ptr<Gnss_Jamming_Protect> gnss_sdr_make_jamm(float threshold, int averages)
-{
-    boost::shared_ptr<Gnss_Jamming_Protect> jamming_detection(new Gnss_Jamming_Protect(threshold, averages));
-    printf("Jamming detection: variable created\n");
-    return jamming_detection;
-}
-#endif
 
 int Gnss_Jamming_Protect::work(int noutput_items,
     gr_vector_const_void_star &input_items,
     gr_vector_void_star &output_items)
 {   long unsigned int ch = 0;
     unsigned int alignment = volk_get_alignment();
-    gr_complex *bufin; // ,*bufin;
+    gr_complex *bufin;
     gr_complex integral;
     const gr_complex* in;
     gr_complex* carre=(gr_complex*)volk_malloc(sizeof(gr_complex)*CHUNK_SIZE, alignment);
-// see https://github.com/gnss-sdr/gnss-sdr/blob/master/src/algorithms/acquisition/gnuradio_blocks/pcps_acquisition_fine_doppler_cc.h for declaration of gr::fft
     bufin=plan->get_inbuf();
-    // ibufin=iplan->get_inbuf();
     for (ch = 0; ch < input_items.size(); ch++)
         { // identity: output the same as 1st channel input
           in= (const gr_complex*)input_items[ch]; // all channels
@@ -82,11 +71,7 @@ int Gnss_Jamming_Protect::work(int noutput_items,
              }
           if (ch==1)
              {
-              // volk_32fc_x2_multiply_conjugate_32fc(bufout,plan->get_outbuf(),bufout0,CHUNK_SIZE);
               volk_32fc_x2_divide_32fc(bufout,plan->get_outbuf(),bufout0,CHUNK_SIZE); // CH1/CH0
-              //memcpy(ibufin, bufout, CHUNK_SIZE * sizeof(gr_complex));
-              //iplan->execute(); // result in iplan->get_outbuf()
-              //weight_+=iplan->get_outbuf()[0]; 
               integral={0.,0.};
               for (int i=0;i<CHUNK_SIZE;i++) integral+=bufout[i];
               integral/=CHUNK_SIZE;

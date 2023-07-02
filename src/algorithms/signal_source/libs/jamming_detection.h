@@ -60,7 +60,6 @@ private:
 
     Gnss_Jamming_Protect(float threshold, int averages);
     std::unique_ptr<gnss_fft_complex_fwd> plan = gnss_fft_fwd_make_unique(CHUNK_SIZE);
-    std::unique_ptr<gnss_fft_complex_rev> iplan = gnss_fft_rev_make_unique(CHUNK_SIZE);
     gr_complex bufout0[CHUNK_SIZE];
     gr_complex bufout[CHUNK_SIZE];
     gr_complex processed_output[CHUNK_SIZE];
