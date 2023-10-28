@@ -254,7 +254,7 @@ void gps_l1_ca_telemetry_decoder_gs::set_channel(int32_t channel)
 }
 
 
-bool gps_l1_ca_telemetry_decoder_gs::decode_subframe(bool flag_invert)
+bool gps_l1_ca_telemetry_decoder_gs::decode_subframe(bool flag_invert, const Gnss_Synchro& current_symbol)
 {
     std::array<char, GPS_SUBFRAME_LENGTH> subframe{};
     int32_t frame_bit_index = 0;
@@ -353,7 +353,8 @@ bool gps_l1_ca_telemetry_decoder_gs::decode_subframe(bool flag_invert)
                     std::cout << "New GPS NAV message received in channel " << this->d_channel << ": "
                               << "subframe "
                               << subframe_ID << " from satellite "
-                              << Gnss_Satellite(std::string("GPS"), d_nav.get_satellite_PRN()) << '\n';
+                              << Gnss_Satellite(std::string("GPS"), d_nav.get_satellite_PRN())
+                              << " tow " << d_nav.get_TOW() << " cnt " << current_symbol.Tracking_sample_counter << '\n';
 
                     switch (subframe_ID)
                         {
@@ -499,7 +500,7 @@ int gps_l1_ca_telemetry_decoder_gs::general_work(int noutput_items __attribute__
                             }
                         DLOG(INFO) << "Preamble detection for GPS L1 satellite " << this->d_satellite;
                         d_prev_GPS_frame_4bytes = 0;
-                        if (decode_subframe(d_flag_PLL_180_deg_phase_locked))
+                        if (decode_subframe(d_flag_PLL_180_deg_phase_locked, current_symbol))
                             {
                                 d_CRC_error_counter = 0;
                                 d_flag_preamble = true;  // valid preamble indicator (initialized to false every work())
@@ -525,7 +526,7 @@ int gps_l1_ca_telemetry_decoder_gs::general_work(int noutput_items __attribute__
                         // 0. fetch the symbols into an array
                         d_preamble_index = d_sample_counter;  // record the preamble sample stamp (t_P)
 
-                        if (decode_subframe(d_flag_PLL_180_deg_phase_locked))
+                        if (decode_subframe(d_flag_PLL_180_deg_phase_locked, current_symbol))
                             {
                                 d_CRC_error_counter = 0;
                                 d_flag_preamble = true;  // valid preamble indicator (initialized to false every work())
